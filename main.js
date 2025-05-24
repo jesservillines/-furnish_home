@@ -560,8 +560,7 @@ class FloorPlanDesigner {
                     ...furniture,
                     width: furniture.dimensions.width,
                     depth: furniture.dimensions.depth,
-                    x: x,
-                    y: y,
+                    position: { x: x, y: y },
                     rotation: 0,
                     layoutId: `furniture-${Date.now()}`,
                     opacity: furniture.category === 'rugs' ? 0.7 : 1.0
@@ -591,8 +590,7 @@ class FloorPlanDesigner {
                 ...furniture,
                 width: furniture.dimensions.width,
                 depth: furniture.dimensions.depth,
-                x: x,
-                y: y,
+                position: { x: x, y: y },
                 rotation: 0
             });
             
@@ -627,8 +625,8 @@ class FloorPlanDesigner {
                 this.selectedFurniture = furniture;
                 this.isDragging = true;
                 this.dragOffset = {
-                    x: x - furniture.x,
-                    y: y - furniture.y
+                    x: x - furniture.position.x,
+                    y: y - furniture.position.y
                 };
                 
                 // Update rotation slider
@@ -669,16 +667,24 @@ class FloorPlanDesigner {
             // Check boundaries
             const bounds = layoutEngine.getFurnitureBounds({
                 ...this.selectedFurniture,
-                x: newX,
-                y: newY
+                position: { x: newX, y: newY }
             });
             
-            if (newX >= 0 && newY >= 0 &&
+            if (bounds.left >= 0 && bounds.top >= 0 &&
                 bounds.right <= this.currentRoom.dimensions.width &&
                 bounds.bottom <= this.currentRoom.dimensions.depth) {
-                this.selectedFurniture.x = newX;
-                this.selectedFurniture.y = newY;
+                this.selectedFurniture.position.x = newX;
+                this.selectedFurniture.position.y = newY;
+                
+                // Update position in layout engine
+                layoutEngine.updateFurniturePosition(
+                    this.selectedFurniture.layoutId,
+                    newX,
+                    newY
+                );
+                
                 this.redrawCanvas();
+                this.saveLayout();
             }
         }
     }
@@ -965,8 +971,8 @@ class FloorPlanDesigner {
             this.ctx.globalAlpha = item.opacity || 1.0;
             
             // Calculate furniture position
-            const furnitureX = roomX + item.x * scale;
-            const furnitureY = roomY + item.y * scale;
+            const furnitureX = roomX + item.position.x * scale;
+            const furnitureY = roomY + item.position.y * scale;
             const furnitureWidth = item.width * scale;
             const furnitureDepth = item.depth * scale;
             
@@ -1121,8 +1127,8 @@ class FloorPlanDesigner {
             this.ctx.globalAlpha = furniture.opacity || 1.0;
             
             // Calculate center point for rotation
-            const centerX = furniture.x + furniture.width / 2;
-            const centerY = furniture.y + furniture.depth / 2;
+            const centerX = furniture.position.x + furniture.width / 2;
+            const centerY = furniture.position.y + furniture.depth / 2;
             
             // Apply rotation
             this.ctx.translate(centerX * this.scale, centerY * this.scale);
@@ -1134,8 +1140,8 @@ class FloorPlanDesigner {
                 this.ctx.strokeStyle = '#4a90e2';
                 this.ctx.lineWidth = 3;
                 this.ctx.strokeRect(
-                    (furniture.x - 2) * this.scale,
-                    (furniture.y - 2) * this.scale,
+                    (furniture.position.x - 2) * this.scale,
+                    (furniture.position.y - 2) * this.scale,
                     (furniture.width + 4) * this.scale,
                     (furniture.depth + 4) * this.scale
                 );
@@ -1159,14 +1165,14 @@ class FloorPlanDesigner {
             this.ctx.lineWidth = 2;
             
             this.ctx.fillRect(
-                furniture.x * this.scale,
-                furniture.y * this.scale,
+                furniture.position.x * this.scale,
+                furniture.position.y * this.scale,
                 furniture.width * this.scale,
                 furniture.depth * this.scale
             );
             this.ctx.strokeRect(
-                furniture.x * this.scale,
-                furniture.y * this.scale,
+                furniture.position.x * this.scale,
+                furniture.position.y * this.scale,
                 furniture.width * this.scale,
                 furniture.depth * this.scale
             );
@@ -1181,8 +1187,8 @@ class FloorPlanDesigner {
             if (furniture.width > 24) {
                 this.ctx.fillText(
                     furniture.name,
-                    (furniture.x + furniture.width / 2) * this.scale,
-                    (furniture.y + furniture.depth / 2) * this.scale
+                    (furniture.position.x + furniture.width / 2) * this.scale,
+                    (furniture.position.y + furniture.depth / 2) * this.scale
                 );
             }
             
@@ -1449,7 +1455,7 @@ class FloorPlanDesigner {
         
         if (this.selectedFurniture) {
             // Rotate by 90 degrees
-            const newRotation = (this.selectedFurniture.rotation + 90) % 360;
+            const newRotation = (this.selectedFurniture.rotation - 15 + 360) % 360;
             this.selectedFurniture.rotation = newRotation;
             
             // Update rotation slider
