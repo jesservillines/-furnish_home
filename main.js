@@ -559,7 +559,7 @@ class FloorPlanDesigner {
         const centerX = Math.round((this.currentRoom.dimensions.width / 2) / this.gridSize) * this.gridSize;
         const centerY = Math.round((this.currentRoom.dimensions.depth / 2) / this.gridSize) * this.gridSize;
         
-        const layoutId = layoutEngine.addFurniture({
+        const newFurniture = layoutEngine.addFurniture({
             ...furnitureData,
             x: centerX,
             y: centerY,
@@ -729,9 +729,9 @@ class FloorPlanDesigner {
             this.selectedFeature.position = { x: newX, y: newY };
             this.redrawCanvas();
         } else if (this.isDragging && this.selectedFurniture) {
-            // Update furniture position
-            const newX = Math.round((x - this.dragOffset.x) / this.gridSize) * this.gridSize;
-            const newY = Math.round((y - this.dragOffset.y) / this.gridSize) * this.gridSize;
+            // Update furniture position (no grid snapping during drag for responsiveness)
+            const newX = x - this.dragOffset.x;
+            const newY = y - this.dragOffset.y;
             
             // Get furniture dimensions accounting for rotation
             const rotation = this.selectedFurniture.rotation || 0;
@@ -751,6 +751,24 @@ class FloorPlanDesigner {
     }
     
     handleMouseUp(e) {
+        if (this.isDragging && this.selectedFurniture) {
+            // Snap to grid on release
+            const snappedX = Math.round(this.selectedFurniture.x / this.gridSize) * this.gridSize;
+            const snappedY = Math.round(this.selectedFurniture.y / this.gridSize) * this.gridSize;
+            
+            this.selectedFurniture.x = snappedX;
+            this.selectedFurniture.y = snappedY;
+            
+            // Save the position
+            layoutEngine.updateFurniturePosition(
+                this.selectedFurniture.layoutId,
+                snappedX,
+                snappedY
+            );
+            this.saveLayout();
+            this.redrawCanvas();
+        }
+        
         this.isDragging = false;
         this.isDraggingFeature = false;
         this.dragOffset = null;
