@@ -2,44 +2,64 @@
 const furnitureDatabase = {
     sofas: [
         {
-            id: 'cb-lounge-sofa',
-            name: 'Lounge II 93" Sofa',
+            id: 'cb-lounge',
+            name: 'Lounge 93" Regular Sofa',
             brand: 'Crate & Barrel',
-            dimensions: { width: 93, depth: 37, height: 31 },
+            dimensions: { width: 93, depth: 41, height: 25 },
             price: 2399,
-            color: 'Taft Cement',
-            style: 'Modern',
-            image: 'sofa-lounge.jpg'
-        },
-        {
-            id: 'cb-axis-sofa',
-            name: 'Axis II 3-Seat Sofa',
-            brand: 'Crate & Barrel',
-            dimensions: { width: 88, depth: 36, height: 30 },
-            price: 1999,
-            color: 'Douglas Charcoal',
+            material: 'Polyester',
+            color: 'Various',
             style: 'Contemporary',
-            image: 'sofa-axis.jpg'
+            features: ['Deep Seating', 'Feather-Down Cushions'],
+            image: 'lounge-sofa.jpg'
         },
         {
-            id: 'cb-willow-sofa',
-            name: 'Willow 83" Sofa',
+            id: 'cb-gather',
+            name: 'Gather 89" Sofa',
             brand: 'Crate & Barrel',
-            dimensions: { width: 83, depth: 34, height: 32 },
-            price: 1899,
-            color: 'Walden Linen',
-            style: 'Traditional',
-            image: 'sofa-willow.jpg'
-        },
-        {
-            id: 'cb-gather-sofa',
-            name: 'Gather Petite Sofa',
-            brand: 'Crate & Barrel',
-            dimensions: { width: 75, depth: 38, height: 34 },
-            price: 2299,
-            color: 'Olson Navy',
+            dimensions: { width: 89, depth: 38, height: 32 },
+            price: 2499,
+            material: 'Performance Fabric',
+            color: 'Various',
             style: 'Modern',
-            image: 'sofa-gather.jpg'
+            features: ['Bench Cushion', 'Clean-lined'],
+            image: 'gather-sofa.jpg'
+        },
+        {
+            id: 'cb-axis',
+            name: 'Axis II 88" Sofa',
+            brand: 'Crate & Barrel',
+            dimensions: { width: 88, depth: 43, height: 32 },
+            price: 1999,
+            material: 'Microfiber',
+            color: 'Light Grey',
+            style: 'Modern',
+            features: ['Track Arms', 'Deep Seating'],
+            image: 'axis-sofa.jpg'
+        },
+        {
+            id: 'cb-apartment',
+            name: 'Petrie 74" Apartment Sofa',
+            brand: 'Crate & Barrel',
+            dimensions: { width: 74, depth: 38, height: 35 },
+            price: 1899,
+            material: 'Velvet',
+            color: 'Various',
+            style: 'Traditional',
+            features: ['Rolled Arms', 'Compact Size'],
+            image: 'petrie-apartment-sofa.jpg'
+        },
+        {
+            id: 'cb-sectional',
+            name: 'Retreat 4-Piece L-Shaped Sectional',
+            brand: 'Crate & Barrel',
+            dimensions: { width: 134, depth: 96, height: 32 },
+            price: 4799,
+            material: 'Performance Fabric',
+            color: 'Various',
+            style: 'Contemporary',
+            features: ['Deep Seats', 'Wide Arms', 'Modular'],
+            image: 'retreat-sectional.jpg'
         }
     ],
     chairs: [
@@ -118,14 +138,28 @@ const furnitureDatabase = {
     ],
     storage: [
         {
+            id: 'cb-metro-rack',
+            name: 'Metro Wire Shelving Unit',
+            brand: 'Metro',
+            dimensions: { width: 48, depth: 18, height: 72 },
+            price: 299,
+            material: 'Chrome Wire',
+            color: 'Chrome',
+            style: 'Industrial',
+            features: ['Adjustable Shelves', '800 lbs per shelf capacity', 'NSF Certified'],
+            image: 'metro-rack.jpg'
+        },
+        {
             id: 'cb-media-console',
             name: 'Rigby 80.5" Media Console',
             brand: 'Crate & Barrel',
             dimensions: { width: 80.5, depth: 18, height: 24 },
             price: 1899,
-            material: 'Natural Walnut',
-            style: 'Mid-Century',
-            image: 'console-rigby.jpg'
+            material: 'Walnut Veneer',
+            color: 'Natural Walnut',
+            style: 'Mid-Century Modern',
+            features: ['Cable Management', 'Adjustable Shelves'],
+            image: 'rigby-media-console.jpg'
         },
         {
             id: 'cb-bookcase',
@@ -324,6 +358,53 @@ const furnitureDatabase = {
             color: 'Graphite',
             style: 'Modern',
             image: 'bench-cavett.jpg'
+        }
+    ],
+    beds: [
+        {
+            id: 'cb-purple-queen',
+            name: 'Purple Mattress Queen Bed Frame',
+            brand: 'Purple',
+            dimensions: { width: 60, depth: 80, height: 36 },
+            price: 1299,
+            material: 'Purple Grid Technology',
+            color: 'Purple/Grey',
+            style: 'Modern',
+            features: ['Purple Grid', 'Motion Isolation', 'Temperature Neutral'],
+            image: 'purple-queen-bed.jpg'
+        },
+        {
+            id: 'cb-upholstered-king',
+            name: 'Tate Upholstered King Bed',
+            brand: 'Crate & Barrel',
+            dimensions: { width: 76, depth: 85, height: 58 },
+            price: 2199,
+            material: 'Linen',
+            color: 'Natural',
+            style: 'Contemporary',
+            image: 'tate-king-bed.jpg'
+        },
+        {
+            id: 'cb-wood-queen',
+            name: 'Linea II Queen Bed',
+            brand: 'Crate & Barrel',
+            dimensions: { width: 64.75, depth: 85.75, height: 45 },
+            price: 1899,
+            material: 'Solid Oak',
+            color: 'Natural Oak',
+            style: 'Modern',
+            image: 'linea-queen-bed.jpg'
+        },
+        {
+            id: 'cb-platform-queen',
+            name: 'Andes Acacia Queen Platform Bed',
+            brand: 'Crate & Barrel',
+            dimensions: { width: 65, depth: 87, height: 14 },
+            price: 1599,
+            material: 'Acacia Wood',
+            color: 'Natural',
+            style: 'Minimalist',
+            image: 'andes-platform-bed.jpg'
         }
     ],
     // Bathroom furniture

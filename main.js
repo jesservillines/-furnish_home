@@ -180,9 +180,9 @@ class FloorPlanDesigner {
         if (sendToBack) {
             sendToBack.addEventListener('click', () => {
                 if (this.selectedFurniture) {
-                    layoutEngine.sendToBack(this.selectedFurniture);
+                    layoutEngine.sendToBack(this.selectedFurniture.layoutId);
                     this.redrawCanvas();
-                    this.updateSelectedFurnitureList();
+                    this.showInfoMessage('Furniture sent to back');
                 }
             });
         }
@@ -191,9 +191,9 @@ class FloorPlanDesigner {
         if (bringToFront) {
             bringToFront.addEventListener('click', () => {
                 if (this.selectedFurniture) {
-                    layoutEngine.bringToFront(this.selectedFurniture);
+                    layoutEngine.bringToFront(this.selectedFurniture.layoutId);
                     this.redrawCanvas();
-                    this.updateSelectedFurnitureList();
+                    this.showInfoMessage('Furniture brought to front');
                 }
             });
         }
@@ -663,7 +663,7 @@ class FloorPlanDesigner {
                 y: newY
             });
             
-            if (bounds.left >= 0 && bounds.top >= 0 &&
+            if (newX >= 0 && newY >= 0 &&
                 bounds.right <= this.currentRoom.dimensions.width &&
                 bounds.bottom <= this.currentRoom.dimensions.depth) {
                 this.selectedFurniture.x = newX;
