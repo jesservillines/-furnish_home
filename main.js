@@ -534,6 +534,23 @@ class FloorPlanDesigner {
         return icons[category] || '📦';
     }
     
+    getFurnitureById(category, furnitureId) {
+        const items = furnitureDatabase[category];
+        if (!items) return null;
+        
+        const furniture = items.find(item => item.id === furnitureId);
+        if (furniture) {
+            return { ...furniture, category };
+        }
+        
+        // Check in additionalFurniture if not found
+        if (furnitureDatabase.additionalFurniture && furnitureDatabase.additionalFurniture[furnitureId]) {
+            return { ...furnitureDatabase.additionalFurniture[furnitureId], category: 'additionalFurniture' };
+        }
+        
+        return null;
+    }
+    
     addFurnitureToCanvas(category, furnitureId) {
         const furnitureData = this.getFurnitureById(category, furnitureId);
         if (!furnitureData) return;
@@ -716,16 +733,16 @@ class FloorPlanDesigner {
             const newX = Math.round((x - this.dragOffset.x) / this.gridSize) * this.gridSize;
             const newY = Math.round((y - this.dragOffset.y) / this.gridSize) * this.gridSize;
             
-            // Check boundaries
-            const bounds = layoutEngine.getFurnitureBounds({
-                ...this.selectedFurniture,
-                x: newX,
-                y: newY
-            });
+            // Get furniture dimensions accounting for rotation
+            const rotation = this.selectedFurniture.rotation || 0;
+            const isRotated = rotation % 180 !== 0;
+            const width = isRotated ? this.selectedFurniture.dimensions.depth : this.selectedFurniture.dimensions.width;
+            const depth = isRotated ? this.selectedFurniture.dimensions.width : this.selectedFurniture.dimensions.depth;
             
-            if (bounds.left >= 0 && bounds.top >= 0 &&
-                bounds.right <= this.currentRoom.dimensions.width &&
-                bounds.bottom <= this.currentRoom.dimensions.depth) {
+            // Simple boundary check
+            if (newX >= 0 && newY >= 0 &&
+                newX + width <= this.currentRoom.dimensions.width &&
+                newY + depth <= this.currentRoom.dimensions.depth) {
                 this.selectedFurniture.x = newX;
                 this.selectedFurniture.y = newY;
                 this.redrawCanvas();
