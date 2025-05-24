@@ -456,48 +456,16 @@ class FloorPlanDesigner {
     }
     
     loadFurnitureCategory(category) {
-        const furnitureList = document.getElementById('furnitureItems');
-        furnitureList.innerHTML = '';
+        const container = document.getElementById('furnitureItems');
+        container.innerHTML = '';
         
-        const items = furnitureDatabase[category] || [];
+        let items = furnitureDatabase[category] || [];
         
-        items.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'furniture-item';
-            div.draggable = true;
-            div.dataset.category = category;
-            div.dataset.furnitureId = item.id;
-            
-            // Add click handler for tablet selection
-            div.addEventListener('click', () => {
-                // Remove previous selection
-                document.querySelectorAll('.furniture-item').forEach(el => el.classList.remove('selected'));
-                // Add selection to clicked item
-                div.classList.add('selected');
-                // Store selected furniture info
-                this.selectedFurnitureItem = { category, id: item.id };
-            });
-            
-            div.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('category', category);
-                e.dataTransfer.setData('furnitureId', item.id);
-            });
-            
-            div.innerHTML = `
-                <h4>${item.name}</h4>
-                <p>${item.dimensions.width}"W × ${item.dimensions.depth}"D</p>
-                <p>$${item.price}</p>
-            `;
-            
-            furnitureList.appendChild(div);
-        });
-        
-        // Add the "Add Selected" button for tablets
+        // Add the "Add Selected" button at the top
         const addButton = document.createElement('button');
         addButton.id = 'addSelectedFurniture';
         addButton.className = 'add-selected-btn';
         addButton.textContent = 'Add Selected Furniture';
-        addButton.style.display = 'none'; // Hidden by default
         
         addButton.addEventListener('click', () => {
             if (this.selectedFurnitureItem) {
@@ -510,12 +478,60 @@ class FloorPlanDesigner {
             }
         });
         
-        furnitureList.appendChild(addButton);
+        container.appendChild(addButton);
         
-        // Show button only on touch devices
-        if ('ontouchstart' in window) {
-            addButton.style.display = 'block';
-        }
+        items.forEach(furniture => {
+            const item = document.createElement('div');
+            item.className = 'furniture-item';
+            item.draggable = true;
+            item.dataset.furnitureId = furniture.id;
+            
+            const icon = this.getFurnitureIcon(category);
+            const price = furniture.price ? `$${furniture.price}` : '';
+            
+            item.innerHTML = `
+                <div class="furniture-icon">${icon}</div>
+                <div class="furniture-info">
+                    <div class="furniture-name">${furniture.name}</div>
+                    <div class="furniture-dimensions">${furniture.dimensions.width}" × ${furniture.dimensions.depth}"</div>
+                    <div class="furniture-price">${price}</div>
+                </div>
+            `;
+            
+            // Add click handler for tablet selection
+            item.addEventListener('click', () => {
+                // Remove previous selection
+                document.querySelectorAll('.furniture-item').forEach(el => el.classList.remove('selected'));
+                // Add selection to clicked item
+                item.classList.add('selected');
+                // Store selected furniture info
+                this.selectedFurnitureItem = { category, id: furniture.id };
+            });
+            
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('furnitureId', furniture.id);
+                e.dataTransfer.setData('category', category);
+            });
+            
+            container.appendChild(item);
+        });
+    }
+    
+    getFurnitureIcon(category) {
+        const icons = {
+            sofas: '🛋️',
+            chairs: '🪑',
+            tables: '⬛',
+            storage: '🗄️',
+            rugs: '▭',
+            lighting: '💡',
+            beds: '🛏️',
+            bathroom: '🚿',
+            kitchen: '🍴',
+            utility: '🧺',
+            foyer: '🚪'
+        };
+        return icons[category] || '📦';
     }
     
     addFurnitureToCanvas(category, furnitureId) {
