@@ -15,6 +15,10 @@ class FloorPlanDesigner {
         this.selectedFeature = null;
         this.allRooms = [];
         this.floorViewScale = 1;
+        this.rooms = floorPlanData;
+        this.currentFloor = 'first';
+        this.featureEditMode = false;
+        this.selectedLibraryFurniture = null;
         
         this.init();
     }
@@ -251,6 +255,45 @@ class FloorPlanDesigner {
                 this.updateSelectedFurnitureList();
             }
         });
+        
+        // Add Selected Furniture button
+        const addSelectedBtn = document.getElementById('addSelectedFurniture');
+        if (addSelectedBtn) {
+            addSelectedBtn.addEventListener('click', () => {
+                if (this.selectedLibraryFurniture && this.currentRoom) {
+                    const { furniture, category } = this.selectedLibraryFurniture;
+                    
+                    // Add furniture to center of room
+                    const centerX = Math.floor(this.currentRoom.dimensions.width / 2 / this.gridSize) * this.gridSize;
+                    const centerY = Math.floor(this.currentRoom.dimensions.depth / 2 / this.gridSize) * this.gridSize;
+                    
+                    layoutEngine.addFurniture({
+                        ...furniture,
+                        width: furniture.dimensions.width,
+                        depth: furniture.dimensions.depth,
+                        position: { x: centerX, y: centerY },
+                        rotation: 0,
+                        layoutId: `furniture-${Date.now()}`,
+                        opacity: category === 'rugs' ? 0.7 : 1.0
+                    });
+                    
+                    this.redrawCanvas();
+                    this.updateSelectedFurnitureList();
+                    this.saveLayout();
+                    this.showInfoMessage('Furniture added to room');
+                    
+                    // Clear selection
+                    document.querySelectorAll('.furniture-item.selected').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                    this.selectedLibraryFurniture = null;
+                    addSelectedBtn.disabled = true;
+                }
+            });
+            
+            // Initially disable the button
+            addSelectedBtn.disabled = true;
+        }
     }
     
     populateRoomSelector() {
@@ -326,11 +369,81 @@ class FloorPlanDesigner {
                 // Add active class to clicked tab
                 e.target.classList.add('active');
                 // Load furniture for selected category
-                this.loadFurnitureCategory(category);
+                this.loadFurnitureCategory(e.target.dataset.category);
             });
             
             tabs.appendChild(button);
         });
+    }
+    
+    loadFurnitureCategory(category) {
+        const container = document.getElementById('furnitureItems');
+        container.innerHTML = '';
+        
+        let items = furnitureDatabase[category] || [];
+        
+        items.forEach(furniture => {
+            const item = document.createElement('div');
+            item.className = 'furniture-item';
+            item.draggable = true;
+            item.dataset.furnitureId = furniture.id;
+            item.dataset.category = category;
+            
+            const icon = this.getFurnitureIcon(category);
+            const price = furniture.price ? `$${furniture.price}` : '';
+            
+            item.innerHTML = `
+                <div class="furniture-icon">${icon}</div>
+                <div class="furniture-info">
+                    <div class="furniture-name">${furniture.name}</div>
+                    <div class="furniture-dimensions">${furniture.dimensions.width}" × ${furniture.dimensions.depth}"</div>
+                    <div class="furniture-price">${price}</div>
+                </div>
+            `;
+            
+            // Add click event for selection (especially for tablets)
+            item.addEventListener('click', (e) => {
+                // Remove previous selection
+                document.querySelectorAll('.furniture-item.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                
+                // Add selection to clicked item
+                item.classList.add('selected');
+                this.selectedLibraryFurniture = { furniture, category };
+                
+                // Enable the add button
+                const addBtn = document.getElementById('addSelectedFurniture');
+                if (addBtn) {
+                    addBtn.disabled = false;
+                }
+            });
+            
+            item.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('furnitureId', furniture.id);
+                e.dataTransfer.setData('category', category);
+            });
+            
+            container.appendChild(item);
+        });
+    }
+    
+    getFurnitureIcon(category) {
+        const icons = {
+            sofas: '🛋️',
+            chairs: '🪑',
+            tables: '⬛',
+            storage: '🗄️',
+            rugs: '▭',
+            lighting: '💡',
+            bedroom: '🛏️',
+            bathroom: '🚿',
+            kitchen: '🍴',
+            utility: '🧺',
+            foyer: '🚪',
+            beds: '🛏️'
+        };
+        return icons[category] || '📦';
     }
     
     populatePresetLayouts() {
@@ -453,56 +566,6 @@ class FloorPlanDesigner {
     
     loadFurnitureLibrary() {
         this.loadFurnitureCategory('sofas');
-    }
-    
-    loadFurnitureCategory(category) {
-        const container = document.getElementById('furnitureItems');
-        container.innerHTML = '';
-        
-        let items = furnitureDatabase[category] || [];
-        
-        items.forEach(furniture => {
-            const item = document.createElement('div');
-            item.className = 'furniture-item';
-            item.draggable = true;
-            item.dataset.furnitureId = furniture.id;
-            
-            const icon = this.getFurnitureIcon(category);
-            const price = furniture.price ? `$${furniture.price}` : '';
-            
-            item.innerHTML = `
-                <div class="furniture-icon">${icon}</div>
-                <div class="furniture-info">
-                    <div class="furniture-name">${furniture.name}</div>
-                    <div class="furniture-dimensions">${furniture.dimensions.width}" × ${furniture.dimensions.depth}"</div>
-                    <div class="furniture-price">${price}</div>
-                </div>
-            `;
-            
-            item.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('furnitureId', furniture.id);
-                e.dataTransfer.setData('category', category);
-            });
-            
-            container.appendChild(item);
-        });
-    }
-    
-    getFurnitureIcon(category) {
-        const icons = {
-            sofas: '🛋️',
-            chairs: '🪑',
-            tables: '⬛',
-            storage: '🗄️',
-            rugs: '▭',
-            lighting: '💡',
-            bedroom: '🛏️',
-            bathroom: '🚿',
-            kitchen: '🍴',
-            utility: '🧺',
-            foyer: '🚪'
-        };
-        return icons[category] || '📦';
     }
     
     handleDrop(e) {
