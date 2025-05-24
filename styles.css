@@ -175,6 +175,14 @@ select {
 #floorPlanCanvas {
     border: 1px solid #ddd;
     cursor: crosshair;
+    /* Improve touch interaction */
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .dimensions-display {
@@ -558,5 +566,33 @@ select {
     .canvas-container {
         order: 1;
         height: 400px;
+    }
+}
+
+/* Touch-friendly furniture items */
+@media (hover: none) and (pointer: coarse) {
+    .furniture-item {
+        padding: 15px;
+        min-height: 80px;
+    }
+    
+    button {
+        min-height: 44px;
+        font-size: 16px;
+    }
+    
+    .tab-btn {
+        min-height: 40px;
+        padding: 10px;
+    }
+    
+    #deleteSelected {
+        min-height: 44px;
+        font-size: 16px;
+    }
+    
+    .rotation-controls button {
+        width: 44px;
+        height: 44px;
     }
 }

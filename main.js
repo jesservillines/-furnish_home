@@ -37,6 +37,14 @@ class FloorPlanDesigner {
         this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
         this.canvas.addEventListener('contextmenu', (e) => this.handleRightClick(e));
         
+        // Add touch event listeners for tablet support
+        this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+        this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e));
+        this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+        
+        // Prevent scrolling when touching the canvas
+        this.canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+        
         // Drag and drop
         this.canvas.addEventListener('dragover', (e) => e.preventDefault());
         this.canvas.addEventListener('drop', (e) => this.handleDrop(e));
@@ -167,10 +175,12 @@ class FloorPlanDesigner {
         if (deleteSelected) {
             deleteSelected.addEventListener('click', () => {
                 if (this.selectedFurniture) {
-                    layoutEngine.removeFurniture(this.selectedFurniture);
+                    layoutEngine.removeFurniture(this.selectedFurniture.layoutId);
                     this.selectedFurniture = null;
                     this.redrawCanvas();
                     this.updateSelectedFurnitureList();
+                    this.saveLayout();
+                    this.showInfoMessage('Furniture deleted');
                 }
             });
         }
@@ -674,24 +684,57 @@ class FloorPlanDesigner {
     }
     
     handleMouseUp(e) {
-        if (this.isDragging && this.selectedFurniture) {
-            // Save the new position
-            layoutEngine.updateFurniturePosition(
-                this.selectedFurniture.layoutId,
-                this.selectedFurniture.x,
-                this.selectedFurniture.y
-            );
-            this.saveLayout();
-        }
-        
-        if (this.isDraggingFeature && this.selectedFeature) {
-            // Save feature position
-            this.saveFeaturePosition();
-        }
-        
         this.isDragging = false;
         this.isDraggingFeature = false;
         this.dragOffset = null;
+        
+        if (this.selectedFeature) {
+            this.saveCustomFeatures();
+        }
+    }
+    
+    // Touch event handlers for tablet support
+    handleTouchStart(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = this.canvas.getBoundingClientRect();
+        
+        // Create a synthetic mouse event
+        const mouseEvent = new MouseEvent('mousedown', {
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            bubbles: true
+        });
+        
+        this.handleMouseDown(mouseEvent);
+    }
+    
+    handleTouchMove(e) {
+        e.preventDefault();
+        if (!this.isDragging && !this.isDraggingFeature) return;
+        
+        const touch = e.touches[0];
+        const rect = this.canvas.getBoundingClientRect();
+        
+        // Create a synthetic mouse event
+        const mouseEvent = new MouseEvent('mousemove', {
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            bubbles: true
+        });
+        
+        this.handleMouseMove(mouseEvent);
+    }
+    
+    handleTouchEnd(e) {
+        e.preventDefault();
+        
+        // Create a synthetic mouse event
+        const mouseEvent = new MouseEvent('mouseup', {
+            bubbles: true
+        });
+        
+        this.handleMouseUp(mouseEvent);
     }
     
     getFeatureAt(x, y) {
