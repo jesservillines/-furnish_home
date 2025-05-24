@@ -1,0 +1,5 @@
+# Netlify redirects file
+# This file is not needed for a simple static site but included for completeness
+
+# Handle any 404s by serving the main index page
+/*    /index.html   200
