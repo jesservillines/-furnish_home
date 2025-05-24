@@ -15,10 +15,6 @@ class FloorPlanDesigner {
         this.selectedFeature = null;
         this.allRooms = [];
         this.floorViewScale = 1;
-        this.rooms = floorPlanData;
-        this.currentFloor = 'first';
-        this.featureEditMode = false;
-        this.selectedLibraryFurniture = null;
         
         this.init();
     }
@@ -255,45 +251,6 @@ class FloorPlanDesigner {
                 this.updateSelectedFurnitureList();
             }
         });
-        
-        // Add Selected Furniture button
-        const addSelectedBtn = document.getElementById('addSelectedFurniture');
-        if (addSelectedBtn) {
-            addSelectedBtn.addEventListener('click', () => {
-                if (this.selectedLibraryFurniture && this.currentRoom) {
-                    const { furniture, category } = this.selectedLibraryFurniture;
-                    
-                    // Add furniture to center of room
-                    const centerX = Math.floor(this.currentRoom.dimensions.width / 2 / this.gridSize) * this.gridSize;
-                    const centerY = Math.floor(this.currentRoom.dimensions.depth / 2 / this.gridSize) * this.gridSize;
-                    
-                    layoutEngine.addFurniture({
-                        ...furniture,
-                        width: furniture.dimensions.width,
-                        depth: furniture.dimensions.depth,
-                        position: { x: centerX, y: centerY },
-                        rotation: 0,
-                        layoutId: `furniture-${Date.now()}`,
-                        opacity: category === 'rugs' ? 0.7 : 1.0
-                    });
-                    
-                    this.redrawCanvas();
-                    this.updateSelectedFurnitureList();
-                    this.saveLayout();
-                    this.showInfoMessage('Furniture added to room');
-                    
-                    // Clear selection
-                    document.querySelectorAll('.furniture-item.selected').forEach(el => {
-                        el.classList.remove('selected');
-                    });
-                    this.selectedLibraryFurniture = null;
-                    addSelectedBtn.disabled = true;
-                }
-            });
-            
-            // Initially disable the button
-            addSelectedBtn.disabled = true;
-        }
     }
     
     populateRoomSelector() {
@@ -369,81 +326,11 @@ class FloorPlanDesigner {
                 // Add active class to clicked tab
                 e.target.classList.add('active');
                 // Load furniture for selected category
-                this.loadFurnitureCategory(e.target.dataset.category);
+                this.loadFurnitureCategory(category);
             });
             
             tabs.appendChild(button);
         });
-    }
-    
-    loadFurnitureCategory(category) {
-        const container = document.getElementById('furnitureItems');
-        container.innerHTML = '';
-        
-        let items = furnitureDatabase[category] || [];
-        
-        items.forEach(furniture => {
-            const item = document.createElement('div');
-            item.className = 'furniture-item';
-            item.draggable = true;
-            item.dataset.furnitureId = furniture.id;
-            item.dataset.category = category;
-            
-            const icon = this.getFurnitureIcon(category);
-            const price = furniture.price ? `$${furniture.price}` : '';
-            
-            item.innerHTML = `
-                <div class="furniture-icon">${icon}</div>
-                <div class="furniture-info">
-                    <div class="furniture-name">${furniture.name}</div>
-                    <div class="furniture-dimensions">${furniture.dimensions.width}" × ${furniture.dimensions.depth}"</div>
-                    <div class="furniture-price">${price}</div>
-                </div>
-            `;
-            
-            // Add click event for selection (especially for tablets)
-            item.addEventListener('click', (e) => {
-                // Remove previous selection
-                document.querySelectorAll('.furniture-item.selected').forEach(el => {
-                    el.classList.remove('selected');
-                });
-                
-                // Add selection to clicked item
-                item.classList.add('selected');
-                this.selectedLibraryFurniture = { furniture, category };
-                
-                // Enable the add button
-                const addBtn = document.getElementById('addSelectedFurniture');
-                if (addBtn) {
-                    addBtn.disabled = false;
-                }
-            });
-            
-            item.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('furnitureId', furniture.id);
-                e.dataTransfer.setData('category', category);
-            });
-            
-            container.appendChild(item);
-        });
-    }
-    
-    getFurnitureIcon(category) {
-        const icons = {
-            sofas: '🛋️',
-            chairs: '🪑',
-            tables: '⬛',
-            storage: '🗄️',
-            rugs: '▭',
-            lighting: '💡',
-            bedroom: '🛏️',
-            bathroom: '🚿',
-            kitchen: '🍴',
-            utility: '🧺',
-            foyer: '🚪',
-            beds: '🛏️'
-        };
-        return icons[category] || '📦';
     }
     
     populatePresetLayouts() {
@@ -568,6 +455,90 @@ class FloorPlanDesigner {
         this.loadFurnitureCategory('sofas');
     }
     
+    loadFurnitureCategory(category) {
+        const furnitureList = document.getElementById('furnitureItems');
+        furnitureList.innerHTML = '';
+        
+        const items = furnitureDatabase[category] || [];
+        
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'furniture-item';
+            div.draggable = true;
+            div.dataset.category = category;
+            div.dataset.furnitureId = item.id;
+            
+            // Add click handler for tablet selection
+            div.addEventListener('click', () => {
+                // Remove previous selection
+                document.querySelectorAll('.furniture-item').forEach(el => el.classList.remove('selected'));
+                // Add selection to clicked item
+                div.classList.add('selected');
+                // Store selected furniture info
+                this.selectedFurnitureItem = { category, id: item.id };
+            });
+            
+            div.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('category', category);
+                e.dataTransfer.setData('furnitureId', item.id);
+            });
+            
+            div.innerHTML = `
+                <h4>${item.name}</h4>
+                <p>${item.dimensions.width}"W × ${item.dimensions.depth}"D</p>
+                <p>$${item.price}</p>
+            `;
+            
+            furnitureList.appendChild(div);
+        });
+        
+        // Add the "Add Selected" button for tablets
+        const addButton = document.createElement('button');
+        addButton.id = 'addSelectedFurniture';
+        addButton.className = 'add-selected-btn';
+        addButton.textContent = 'Add Selected Furniture';
+        addButton.style.display = 'none'; // Hidden by default
+        
+        addButton.addEventListener('click', () => {
+            if (this.selectedFurnitureItem) {
+                this.addFurnitureToCanvas(
+                    this.selectedFurnitureItem.category,
+                    this.selectedFurnitureItem.id
+                );
+            } else {
+                this.showInfoMessage('Please select a furniture item first');
+            }
+        });
+        
+        furnitureList.appendChild(addButton);
+        
+        // Show button only on touch devices
+        if ('ontouchstart' in window) {
+            addButton.style.display = 'block';
+        }
+    }
+    
+    addFurnitureToCanvas(category, furnitureId) {
+        const furnitureData = this.getFurnitureById(category, furnitureId);
+        if (!furnitureData) return;
+        
+        // Add furniture at center of visible area
+        const centerX = Math.round((this.currentRoom.dimensions.width / 2) / this.gridSize) * this.gridSize;
+        const centerY = Math.round((this.currentRoom.dimensions.depth / 2) / this.gridSize) * this.gridSize;
+        
+        const layoutId = layoutEngine.addFurniture({
+            ...furnitureData,
+            x: centerX,
+            y: centerY,
+            rotation: 0
+        });
+        
+        this.redrawCanvas();
+        this.updateSelectedFurnitureList();
+        this.saveLayout();
+        this.showInfoMessage('Furniture added to canvas');
+    }
+    
     handleDrop(e) {
         e.preventDefault();
         
@@ -623,7 +594,8 @@ class FloorPlanDesigner {
                     ...furniture,
                     width: furniture.dimensions.width,
                     depth: furniture.dimensions.depth,
-                    position: { x: x, y: y },
+                    x: x,
+                    y: y,
                     rotation: 0,
                     layoutId: `furniture-${Date.now()}`,
                     opacity: furniture.category === 'rugs' ? 0.7 : 1.0
@@ -653,7 +625,8 @@ class FloorPlanDesigner {
                 ...furniture,
                 width: furniture.dimensions.width,
                 depth: furniture.dimensions.depth,
-                position: { x: x, y: y },
+                x: x,
+                y: y,
                 rotation: 0
             });
             
@@ -688,8 +661,8 @@ class FloorPlanDesigner {
                 this.selectedFurniture = furniture;
                 this.isDragging = true;
                 this.dragOffset = {
-                    x: x - furniture.position.x,
-                    y: y - furniture.position.y
+                    x: x - furniture.x,
+                    y: y - furniture.y
                 };
                 
                 // Update rotation slider
@@ -730,24 +703,16 @@ class FloorPlanDesigner {
             // Check boundaries
             const bounds = layoutEngine.getFurnitureBounds({
                 ...this.selectedFurniture,
-                position: { x: newX, y: newY }
+                x: newX,
+                y: newY
             });
             
             if (bounds.left >= 0 && bounds.top >= 0 &&
                 bounds.right <= this.currentRoom.dimensions.width &&
                 bounds.bottom <= this.currentRoom.dimensions.depth) {
-                this.selectedFurniture.position.x = newX;
-                this.selectedFurniture.position.y = newY;
-                
-                // Update position in layout engine
-                layoutEngine.updateFurniturePosition(
-                    this.selectedFurniture.layoutId,
-                    newX,
-                    newY
-                );
-                
+                this.selectedFurniture.x = newX;
+                this.selectedFurniture.y = newY;
                 this.redrawCanvas();
-                this.saveLayout();
             }
         }
     }
@@ -1034,8 +999,8 @@ class FloorPlanDesigner {
             this.ctx.globalAlpha = item.opacity || 1.0;
             
             // Calculate furniture position
-            const furnitureX = roomX + item.position.x * scale;
-            const furnitureY = roomY + item.position.y * scale;
+            const furnitureX = roomX + item.x * scale;
+            const furnitureY = roomY + item.y * scale;
             const furnitureWidth = item.width * scale;
             const furnitureDepth = item.depth * scale;
             
@@ -1190,8 +1155,8 @@ class FloorPlanDesigner {
             this.ctx.globalAlpha = furniture.opacity || 1.0;
             
             // Calculate center point for rotation
-            const centerX = furniture.position.x + furniture.width / 2;
-            const centerY = furniture.position.y + furniture.depth / 2;
+            const centerX = furniture.x + furniture.width / 2;
+            const centerY = furniture.y + furniture.depth / 2;
             
             // Apply rotation
             this.ctx.translate(centerX * this.scale, centerY * this.scale);
@@ -1203,8 +1168,8 @@ class FloorPlanDesigner {
                 this.ctx.strokeStyle = '#4a90e2';
                 this.ctx.lineWidth = 3;
                 this.ctx.strokeRect(
-                    (furniture.position.x - 2) * this.scale,
-                    (furniture.position.y - 2) * this.scale,
+                    (furniture.x - 2) * this.scale,
+                    (furniture.y - 2) * this.scale,
                     (furniture.width + 4) * this.scale,
                     (furniture.depth + 4) * this.scale
                 );
@@ -1228,14 +1193,14 @@ class FloorPlanDesigner {
             this.ctx.lineWidth = 2;
             
             this.ctx.fillRect(
-                furniture.position.x * this.scale,
-                furniture.position.y * this.scale,
+                furniture.x * this.scale,
+                furniture.y * this.scale,
                 furniture.width * this.scale,
                 furniture.depth * this.scale
             );
             this.ctx.strokeRect(
-                furniture.position.x * this.scale,
-                furniture.position.y * this.scale,
+                furniture.x * this.scale,
+                furniture.y * this.scale,
                 furniture.width * this.scale,
                 furniture.depth * this.scale
             );
@@ -1250,8 +1215,8 @@ class FloorPlanDesigner {
             if (furniture.width > 24) {
                 this.ctx.fillText(
                     furniture.name,
-                    (furniture.position.x + furniture.width / 2) * this.scale,
-                    (furniture.position.y + furniture.depth / 2) * this.scale
+                    (furniture.x + furniture.width / 2) * this.scale,
+                    (furniture.y + furniture.depth / 2) * this.scale
                 );
             }
             
@@ -1518,7 +1483,7 @@ class FloorPlanDesigner {
         
         if (this.selectedFurniture) {
             // Rotate by 90 degrees
-            const newRotation = (this.selectedFurniture.rotation - 15 + 360) % 360;
+            const newRotation = (this.selectedFurniture.rotation + 90) % 360;
             this.selectedFurniture.rotation = newRotation;
             
             // Update rotation slider
