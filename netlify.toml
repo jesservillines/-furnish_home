@@ -1,0 +1,31 @@
+# Netlify configuration for static site deployment
+
+[build]
+  # No build command needed for static sites
+  publish = "."
+
+[[headers]]
+  # Define which paths this specific [[headers]] block will cover
+  for = "/*"
+  [headers.values]
+    # Allow cross-origin requests for assets
+    Access-Control-Allow-Origin = "*"
+    
+    # Security headers
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Redirect rules for single page application (if needed in future)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Role = ["admin"]}
+  force = false
+
+# Custom 404 page (optional)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 404

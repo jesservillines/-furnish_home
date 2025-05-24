@@ -1,0 +1,562 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.container {
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header h1 {
+    font-size: 28px;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+header p {
+    color: #7f8c8d;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 300px 1fr 300px;
+    gap: 20px;
+    height: calc(100vh - 180px);
+}
+
+.sidebar, .info-panel {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow-y: auto;
+}
+
+.upload-section, .room-selector, .furniture-library, .layout-presets, .controls {
+    margin-bottom: 25px;
+}
+
+h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+button {
+    width: 100%;
+    padding: 10px 15px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.furniture-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.tab-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px;
+    font-size: 12px;
+    background: #ecf0f1;
+    color: #2c3e50;
+}
+
+.tab-btn.active {
+    background: #3498db;
+    color: white;
+}
+
+.furniture-items {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.furniture-item {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    cursor: grab;
+    transition: all 0.3s;
+    background: #f8f9fa;
+    text-align: center;
+}
+
+.furniture-item:hover {
+    border-color: #3498db;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.furniture-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.furniture-item img {
+    width: 100%;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 5px;
+}
+
+.furniture-item .name {
+    font-size: 12px;
+    font-weight: 500;
+    margin-bottom: 3px;
+}
+
+.furniture-item .dimensions {
+    font-size: 10px;
+    color: #7f8c8d;
+}
+
+.canvas-container {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#floorPlanCanvas {
+    border: 1px solid #ddd;
+    cursor: crosshair;
+}
+
+.dimensions-display {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.controls button {
+    margin-bottom: 10px;
+}
+
+.controls button:nth-child(2) {
+    background: #27ae60;
+}
+
+.controls button:nth-child(2):hover {
+    background: #229954;
+}
+
+.controls button:nth-child(3) {
+    background: #e74c3c;
+}
+
+.controls button:nth-child(3):hover {
+    background: #c0392b;
+}
+
+#roomInfo, #selectedFurniture, #designTips {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.room-details {
+    margin-bottom: 10px;
+}
+
+.room-details strong {
+    color: #2c3e50;
+}
+
+.furniture-list {
+    list-style: none;
+}
+
+.furniture-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.tip {
+    background: #e8f4fd;
+    padding: 10px;
+    border-left: 3px solid #3498db;
+    margin-bottom: 10px;
+    font-size: 13px;
+}
+
+/* View controls */
+.view-controls {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.view-btn {
+    padding: 8px 16px;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.view-btn:hover {
+    background: #e0e0e0;
+}
+
+.view-btn.active {
+    background: #0066cc;
+    color: white;
+    border-color: #0066cc;
+}
+
+/* Room selector */
+.room-selector {
+    margin-bottom: 20px;
+}
+
+.room-selector h3 {
+    margin-bottom: 10px;
+}
+
+/* Furniture tabs update */
+.furniture-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.tab-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+/* Furniture items update */
+.furniture-items {
+    height: 300px;
+    overflow-y: auto;
+}
+
+.furniture-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: move;
+    transition: all 0.2s;
+}
+
+.furniture-item:hover {
+    background: #f0f0f0;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.furniture-icon {
+    width: 50px;
+    height: 50px;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    border-radius: 4px;
+    font-size: 24px;
+}
+
+.furniture-info {
+    flex: 1;
+}
+
+.furniture-name {
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.furniture-dimensions {
+    font-size: 11px;
+    color: #666;
+}
+
+.furniture-price {
+    font-size: 12px;
+    color: #0066cc;
+    font-weight: bold;
+}
+
+/* Rotation controls */
+.rotation-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.rotation-controls button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rotation-controls button:hover {
+    background: #f0f0f0;
+}
+
+#rotationSlider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: #ddd;
+    outline: none;
+    border-radius: 2px;
+}
+
+#rotationSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #0066cc;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+#rotationSlider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #0066cc;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+#rotationValue {
+    min-width: 40px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Delete button styling */
+#deleteSelected {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+#deleteSelected:hover {
+    background: #c82333;
+}
+
+/* Controls section update */
+.controls {
+    margin-bottom: 20px;
+}
+
+.controls h3 {
+    margin-bottom: 10px;
+}
+
+/* Room dimension editor */
+.room-dimensions {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 5px;
+}
+
+.room-dimensions h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.dimension-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dimension-inputs label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.dimension-inputs input {
+    width: 80px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.unit {
+    font-size: 12px;
+    color: #666;
+}
+
+#updateDimensions {
+    margin-top: 10px;
+    background: #4CAF50;
+    color: white;
+}
+
+#updateDimensions:hover {
+    background: #45a049;
+}
+
+/* Room stat styling */
+.room-stat {
+    padding: 5px 0;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+}
+
+.room-stat:last-child {
+    border-bottom: none;
+}
+
+.room-stat strong {
+    color: #333;
+}
+
+/* Layer and opacity controls */
+.layer-controls, .opacity-controls {
+    margin: 15px 0;
+}
+
+.layer-controls h4, .opacity-controls h4 {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #333;
+}
+
+.layer-controls button {
+    padding: 6px 12px;
+    margin-right: 8px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.layer-controls button:hover {
+    background-color: #e0e0e0;
+}
+
+.opacity-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.opacity-controls input[type="range"] {
+    width: 100%;
+}
+
+.opacity-controls span {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .main-content {
+        grid-template-columns: 250px 1fr;
+    }
+    
+    .info-panel {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar {
+        order: 2;
+    }
+    
+    .canvas-container {
+        order: 1;
+        height: 400px;
+    }
+}

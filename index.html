@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floor Plan Furniture Designer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Floor Plan Furniture Designer</h1>
+            <p>Upload floor plans and design with Crate & Barrel furniture</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="upload-section">
+                    <h3>Upload Floor Plan</h3>
+                    <input type="file" id="floorPlanUpload" accept="image/*">
+                    <button id="processFloorPlan">Process Floor Plan</button>
+                </div>
+                
+                <div class="room-selector">
+                    <h3>Select Room</h3>
+                    <select id="roomSelector">
+                        <option value="">Select a room...</option>
+                    </select>
+                    <div class="view-controls">
+                        <button id="viewToggle" class="view-btn">Floor View</button>
+                        <button id="editFeatures" class="view-btn">Edit Features</button>
+                    </div>
+                </div>
+                
+                <div class="furniture-library">
+                    <h3>Furniture Library</h3>
+                    <div class="furniture-tabs">
+                        <button class="tab-btn active" data-category="sofas">Sofas</button>
+                        <button class="tab-btn" data-category="chairs">Chairs</button>
+                        <button class="tab-btn" data-category="tables">Tables</button>
+                        <button class="tab-btn" data-category="storage">Storage</button>
+                        <button class="tab-btn" data-category="rugs">Rugs</button>
+                        <button class="tab-btn" data-category="lighting">Lighting</button>
+                        <button class="tab-btn" data-category="bedroom">Bedroom</button>
+                        <button class="tab-btn" data-category="bathroom">Bath</button>
+                        <button class="tab-btn" data-category="kitchen">Kitchen</button>
+                        <button class="tab-btn" data-category="utility">Utility</button>
+                        <button class="tab-btn" data-category="foyer">Foyer</button>
+                    </div>
+                    <div id="furnitureItems" class="furniture-items"></div>
+                </div>
+                
+                <div class="layout-presets">
+                    <h3>Pre-designed Layouts</h3>
+                    <select id="layoutPresets">
+                        <option value="">Choose a layout...</option>
+                        <option value="modern-living">Modern Living Room</option>
+                        <option value="cozy-traditional">Cozy Traditional</option>
+                        <option value="minimalist">Minimalist Design</option>
+                        <option value="entertainment">Entertainment Focus</option>
+                    </select>
+                    <button id="applyPreset">Apply Layout</button>
+                </div>
+                
+                <div class="controls">
+                    <h3>Object Controls</h3>
+                    <div class="rotation-controls">
+                        <button id="rotateLeft" title="Rotate Left 15°">↺</button>
+                        <input type="range" id="rotationSlider" min="0" max="359" value="0" step="15">
+                        <button id="rotateRight" title="Rotate Right 15°">↻</button>
+                        <span id="rotationValue">0°</span>
+                    </div>
+                    
+                    <div class="layer-controls">
+                        <h4>Layer Order</h4>
+                        <button id="sendToBack" title="Send to Back">Send to Back</button>
+                        <button id="bringToFront" title="Bring to Front">Bring to Front</button>
+                    </div>
+                    
+                    <div class="opacity-controls">
+                        <h4>Opacity</h4>
+                        <input type="range" id="opacitySlider" min="10" max="100" value="100" step="10">
+                        <span id="opacityValue">100%</span>
+                    </div>
+                    
+                    <button id="deleteSelected">Delete Selected</button>
+                    <button id="clearCanvas">Clear Canvas</button>
+                    <button id="saveLayout">Save Layout</button>
+                    <button id="exportDesign">Export Design</button>
+                </div>
+            </div>
+            
+            <div class="canvas-container">
+                <canvas id="floorPlanCanvas"></canvas>
+                <div class="dimensions-display">
+                    <span id="dimensionsInfo"></span>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <div class="info-section">
+                    <h3>Room Information</h3>
+                    <div id="roomInfo"></div>
+                    <div id="infoMessage" style="display: none; padding: 10px; background: #4caf50; color: white; border-radius: 4px; margin-top: 10px; text-align: center;"></div>
+                    <div class="room-dimensions">
+                        <h4>Room Dimensions</h4>
+                        <div class="dimension-inputs">
+                            <label>
+                                Width: 
+                                <input type="number" id="roomWidth" min="60" max="600" step="1">
+                                <span class="unit">inches</span>
+                            </label>
+                            <label>
+                                Depth: 
+                                <input type="number" id="roomDepth" min="60" max="600" step="1">
+                                <span class="unit">inches</span>
+                            </label>
+                            <button id="updateDimensions" class="btn btn-secondary">Update Room Size</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>Selected Furniture</h3>
+                <div id="selectedFurniture"></div>
+                
+                <h3>Design Tips</h3>
+                <div id="designTips"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="furniture-database.js"></script>
+    <script src="floor-plan-parser.js"></script>
+    <script src="layout-engine.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

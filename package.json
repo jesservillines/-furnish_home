@@ -1,0 +1,22 @@
+{
+  "name": "floor-plan-furniture-designer",
+  "version": "1.0.0",
+  "description": "Interactive floor plan furniture design application with Crate & Barrel furniture",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8080",
+    "dev": "live-server --port=8080"
+  },
+  "keywords": [
+    "floor-plan",
+    "furniture",
+    "design",
+    "interior-design",
+    "crate-and-barrel"
+  ],
+  "author": "Jesse Villines",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
